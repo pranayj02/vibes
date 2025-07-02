@@ -5,40 +5,74 @@
   <title>Izzu’s Bunking Powertool</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    :root {
+      --bg: #fefeff;
+      --card: #ffffff;
+      --text: #333;
+      --attended: #c8f7c5;
+      --bunked: #f9c0c0;
+      --upcoming: #e0e0e0;
+    }
+    body.dark {
+      --bg: #1e1e2f;
+      --card: #2c2c3e;
+      --text: #eee;
+      --attended: #2e8b57;
+      --bunked: #8b2e2e;
+      --upcoming: #555;
+    }
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      background: #fdfcff;
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
       padding: 20px;
+      transition: all 0.3s ease;
     }
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
-    .carousel {
-      display: flex;
-      overflow-x: auto;
-      gap: 10px;
-      padding: 10px;
-      margin-bottom: 30px;
+    .toggle-dark {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #ffd93d;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
     }
-    .carousel img {
-      max-height: 180px;
-      border-radius: 10px;
-      flex-shrink: 0;
+    .carousel-container {
+      max-width: 600px;
+      margin: 0 auto 20px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .carousel-image {
+      display: none;
+      width: 100%;
+      border-radius: 12px;
     }
     .subject-card {
-      border: 1px solid #ccc;
-      background: #fff;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 12px;
-    }
-    .subject-card h3 {
-      margin: 0 0 6px;
+      background: var(--card);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px auto;
+      max-width: 700px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
     .calendar {
       margin-top: 30px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .calendar-grid {
       display: grid;
@@ -47,76 +81,82 @@
       margin-top: 10px;
     }
     .calendar-day {
-      background: #fff;
-      padding: 8px;
-      border-radius: 6px;
-      text-align: center;
-      font-size: 14px;
+      background: var(--card);
+      border-radius: 8px;
+      padding: 6px;
+      min-height: 80px;
+      font-size: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .calendar-day h4 {
+      margin: 0 0 4px;
+    }
+    .class-button {
+      display: block;
+      margin: 2px 0;
+      font-size: 11px;
+      padding: 2px 4px;
+      border-radius: 5px;
       cursor: pointer;
-      border: 1px solid #ddd;
+      text-align: center;
     }
-    .calendar-day.attended {
-      background-color: #c8f7c5;
-    }
-    .calendar-day.bunked {
-      background-color: #f9c0c0;
-    }
-    .calendar-day.today {
-      outline: 2px solid gold;
-    }
+    .attended { background: var(--attended); }
+    .bunked { background: var(--bunked); }
+    .upcoming { background: var(--upcoming); }
     .legend {
       display: flex;
       justify-content: center;
+      gap: 15px;
       margin-top: 10px;
-      gap: 20px;
     }
-    .legend div {
+    .legend span {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 14px;
     }
     .dot {
       width: 12px;
       height: 12px;
       border-radius: 50%;
     }
-    .dot.attended { background: #45cb78; }
-    .dot.bunked   { background: #e14e4e; }
-    .dot.upcoming { background: #ccc; }
+    .dot.attended { background: var(--attended); }
+    .dot.bunked   { background: var(--bunked); }
+    .dot.upcoming { background: var(--upcoming); }
   </style>
 </head>
 <body>
+  <button class="toggle-dark" onclick="toggleDarkMode()">🌙 Toggle</button>
   <header>
     <h1>Izzu’s Bunking Powertool</h1>
   </header>
 
-  <!-- 🎠 Carousel -->
-  <div class="carousel">
-    <img src="FE587BEE-B75A-4339-A4FC-4BDBE073A250.jpeg" />
-    <img src="IMG_0330.jpeg" />
-    <img src="IMG_3484.jpeg" />
-    <img src="IMG_5178.jpeg" />
-    <img src="IMG_5179.jpeg" />
-    <img src="IMG_5180.jpeg" />
+  <div class="carousel-container">
+    <img class="carousel-image" src="FE587BEE-B75A-4339-A4FC-4BDBE073A250.jpeg" />
+    <img class="carousel-image" src="IMG_0330.jpeg" />
+    <img class="carousel-image" src="IMG_3484.jpeg" />
+    <img class="carousel-image" src="IMG_5178.jpeg" />
+    <img class="carousel-image" src="IMG_5179.jpeg" />
+    <img class="carousel-image" src="IMG_5180.jpeg" />
   </div>
 
-  <!-- 📊 Subject-wise Stats -->
   <div id="subjectStats"></div>
 
-  <!-- 📅 Calendar -->
   <div class="calendar">
-    <h2>📅 Global Calendar</h2>
-    <div id="calendarGrid" class="calendar-grid"></div>
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">← Prev</button>
+      <h2 id="monthLabel"></h2>
+      <button onclick="changeMonth(1)">Next →</button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
     <div class="legend">
-      <div><div class="dot attended"></div>Attended</div>
-      <div><div class="dot bunked"></div>Bunked</div>
-      <div><div class="dot upcoming"></div>Upcoming</div>
+      <span><div class="dot attended"></div>Attended</span>
+      <span><div class="dot bunked"></div>Bunked</span>
+      <span><div class="dot upcoming"></div>Upcoming</span>
     </div>
   </div>
 
   <script>
-    const timetable = {
+    const subjects = {
       "Design Dissertation - 1": [1],
       "Environmental Studies - 4": [1],
       "Arch. Design Studio - 8": [2, 3],
@@ -126,56 +166,62 @@
       "Building Construction - 8": [5],
       "Building Services - 6": [4],
     };
-
-    const startDate = new Date("2025-06-10");
-    const endDate = new Date("2025-10-03");
     const holidays = ["2025-08-15", "2025-09-19", "2025-10-02"];
-    const attendanceData = {};
+    const start = new Date("2025-06-10");
+    const end = new Date("2025-10-03");
+    let viewMonth = start.getMonth();
+    let viewYear = start.getFullYear();
+    const storageKey = 'izzus-attendance';
+    const attendance = JSON.parse(localStorage.getItem(storageKey) || '{}');
 
-    Object.keys(timetable).forEach(subject => {
-      attendanceData[subject] = {};
-    });
-
-    function getDates() {
-      const days = [];
-      let d = new Date(startDate);
-      while (d <= endDate) {
-        days.push(new Date(d));
-        d.setDate(d.getDate() + 1);
-      }
-      return days;
+    function saveData() {
+      localStorage.setItem(storageKey, JSON.stringify(attendance));
     }
 
-    function toggleAttendance(subject, dateStr) {
-      const current = attendanceData[subject][dateStr];
-      attendanceData[subject][dateStr] =
-        current === "attended"
-          ? "bunked"
-          : current === "bunked"
-          ? "attended"
-          : "attended";
-      renderStats();
-      renderCalendar();
+    function getAllDates() {
+      const out = [];
+      let d = new Date(start);
+      while (d <= end) {
+        out.push(new Date(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+
+    function formatDate(d) {
+      return d.toISOString().slice(0, 10);
+    }
+
+    function toggleStatus(subject, dateStr) {
+      const key = `${subject}_${dateStr}`;
+      attendance[key] = attendance[key] === 'attended' ? 'bunked' :
+                        attendance[key] === 'bunked' ? 'attended' : 'attended';
+      saveData();
+      render();
     }
 
     function renderStats() {
       const container = document.getElementById("subjectStats");
-      container.innerHTML = "";
-
-      Object.entries(attendanceData).forEach(([subject, records]) => {
-        const total = Object.keys(records).length;
-        const attended = Object.values(records).filter((v) => v === "attended").length;
-        const bunked = Object.values(records).filter((v) => v === "bunked").length;
-        const held = attended + bunked;
+      container.innerHTML = '';
+      Object.entries(subjects).forEach(([subject, days]) => {
+        let total = 0, attended = 0, bunked = 0;
+        getAllDates().forEach(date => {
+          const dStr = formatDate(date);
+          if (days.includes(date.getDay()) && !holidays.includes(dStr)) {
+            total++;
+            const key = `${subject}_${dStr}`;
+            if (attendance[key] === 'attended') attended++;
+            if (attendance[key] === 'bunked') bunked++;
+          }
+        });
         const required = Math.ceil(0.75 * total);
-        const canBunk = Math.max(0, attended + (total - held) - required);
+        const canBunk = Math.max(0, attended + (total - attended - bunked) - required);
         const mustAttend = Math.max(0, required - attended);
-
-        const div = document.createElement("div");
-        div.className = "subject-card";
+        const div = document.createElement('div');
+        div.className = 'subject-card';
         div.innerHTML = `
           <h3>${subject}</h3>
-          <p>Held: ${held} / ${total} | Attended: ${attended} | Bunked: ${bunked}</p>
+          <p>Held: ${attended + bunked} / ${total} | Attended: ${attended} | Bunked: ${bunked}</p>
           <p>Can still bunk: ${canBunk} | Must attend: ${mustAttend}</p>
         `;
         container.appendChild(div);
@@ -184,39 +230,64 @@
 
     function renderCalendar() {
       const grid = document.getElementById("calendarGrid");
-      grid.innerHTML = "";
-      const days = getDates();
+      grid.innerHTML = '';
+      const label = document.getElementById("monthLabel");
+      const first = new Date(viewYear, viewMonth, 1);
+      const startDay = new Date(first);
+      startDay.setDate(first.getDate() - first.getDay());
+      label.textContent = first.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-      days.forEach((date) => {
-        const cell = document.createElement("div");
-        const dStr = date.toISOString().slice(0, 10);
-        cell.className = "calendar-day";
-        const today = new Date().toDateString() === date.toDateString();
-        if (today) cell.classList.add("today");
+      for (let i = 0; i < 42; i++) {
+        const date = new Date(startDay);
+        date.setDate(startDay.getDate() + i);
+        const dStr = formatDate(date);
+        const cell = document.createElement('div');
+        cell.className = 'calendar-day';
+        cell.innerHTML = `<h4>${date.getDate()}</h4>`;
 
-        const contents = [`<div>${date.getDate()}</div>`];
-
-        Object.entries(timetable).forEach(([subject, classDays]) => {
-          if (classDays.includes(date.getDay()) && !holidays.includes(dStr)) {
-            const status = attendanceData[subject][dStr] || "upcoming";
-            attendanceData[subject][dStr] = status;
-            contents.push(
-              `<div class="${status}" onclick="toggleAttendance('${subject}','${dStr}')">
-                ${subject.split(" ")[0].slice(0, 4)}
-              </div>`
-            );
-            if (status === "attended") cell.classList.add("attended");
-            else if (status === "bunked") cell.classList.add("bunked");
+        Object.entries(subjects).forEach(([subject, days]) => {
+          if (days.includes(date.getDay()) && !holidays.includes(dStr)) {
+            const key = `${subject}_${dStr}`;
+            const status = attendance[key] || 'upcoming';
+            const btn = document.createElement('div');
+            btn.className = `class-button ${status}`;
+            btn.textContent = subject.split(" ")[0].slice(0, 4);
+            btn.onclick = () => toggleStatus(subject, dStr);
+            cell.appendChild(btn);
           }
         });
 
-        cell.innerHTML = contents.join("");
         grid.appendChild(cell);
-      });
+      }
     }
 
-    renderStats();
-    renderCalendar();
+    function render() {
+      renderStats();
+      renderCalendar();
+    }
+
+    function changeMonth(offset) {
+      viewMonth += offset;
+      if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+      if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      render();
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function rotateCarousel() {
+      const imgs = document.querySelectorAll('.carousel-image');
+      let idx = 0;
+      setInterval(() => {
+        imgs.forEach((img, i) => img.style.display = i === idx ? 'block' : 'none');
+        idx = (idx + 1) % imgs.length;
+      }, 3000);
+    }
+
+    rotateCarousel();
+    render();
   </script>
 </body>
 </html>
