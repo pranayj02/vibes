@@ -890,6 +890,12 @@
                     <div class="carousel-slide">
                         <img src="FE587BEE-B75A-4339-A4FC-4BDBE073A250.jpeg" alt="Campus Image 6">
                     </div>
+                    <div class="carousel-slide">
+                        <img src="IMG_4209.jpg" alt="Campus Image 7">
+                    </div>
+                    <div class="carousel-slide">
+                        <img src="IMG_4255.jpg" alt="Campus Image 8">
+                    </div>
                 </div>
                 <button class="carousel-nav prev" onclick="changeSlide(-1)">‹</button>
                 <button class="carousel-nav next" onclick="changeSlide(1)">›</button>
@@ -937,7 +943,7 @@
     <script>
         // Image Carousel
         let currentSlide = 0;
-        const totalSlides = 6;
+        const totalSlides = 8;
 
         function initializeCarousel() {
             const indicators = document.getElementById('carouselIndicators');
@@ -995,7 +1001,7 @@
                 target: 75,
                 startDate: new Date('2025-06-10'),
                 examDate: new Date('2025-09-16'),
-                classDays: [2], // Tuesday
+                classDays: [2], // Tuesday only (double lecture)
                 timeSlot: "7:30 AM - 2:00 PM",
                 attendance: {}
             },
@@ -1225,7 +1231,8 @@
         function saveData() {
             const data = {
                 subjects: subjects,
-                selectedSubject: selectedSubject
+                selectedSubject: selectedSubject,
+                scheduleVersion: 2 // Updated version after removing Arch Design from Monday
             };
             localStorage.setItem('attendanceData', JSON.stringify(data));
         }
@@ -1234,6 +1241,13 @@
             const saved = localStorage.getItem('attendanceData');
             if (saved) {
                 const data = JSON.parse(saved);
+                // Check if this is an old version of the schedule
+                if (!data.scheduleVersion || data.scheduleVersion < 2) {
+                    // Clear old data and use new schedule
+                    localStorage.removeItem('attendanceData');
+                    console.log('Schedule updated - clearing old attendance data');
+                    return;
+                }
                 if (data.subjects) {
                     subjects = data.subjects.map(subject => ({
                         ...subject,
