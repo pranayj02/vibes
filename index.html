@@ -1225,7 +1225,8 @@
         function saveData() {
             const data = {
                 subjects: subjects,
-                selectedSubject: selectedSubject
+                selectedSubject: selectedSubject,
+                scheduleVersion: 2 // Updated version after removing Arch Design from Monday
             };
             localStorage.setItem('attendanceData', JSON.stringify(data));
         }
@@ -1234,6 +1235,13 @@
             const saved = localStorage.getItem('attendanceData');
             if (saved) {
                 const data = JSON.parse(saved);
+                // Check if this is an old version of the schedule
+                if (!data.scheduleVersion || data.scheduleVersion < 2) {
+                    // Clear old data and use new schedule
+                    localStorage.removeItem('attendanceData');
+                    console.log('Schedule updated - clearing old attendance data');
+                    return;
+                }
                 if (data.subjects) {
                     subjects = data.subjects.map(subject => ({
                         ...subject,
