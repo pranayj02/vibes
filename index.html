@@ -1007,10 +1007,14 @@
                 <button class="quick-btn" onclick="exportData()">📊 Export Report</button>
             </div>
 
+            <!-- Save Attendance Button -->
+            <div style="text-align:center; margin-bottom: 24px;">
+                <button id="save-attendance-btn" class="quick-btn" style="font-size:1.1em; padding: 14px 32px;">💾 Save Attendance</button>
+            </div>
+
             <!-- Main Content -->
             <div class="content-wrapper">
                 <div class="subjects-grid" id="subjectsGrid"></div>
-
                 <div class="calendar">
                     <div class="calendar-header">
                         <button class="calendar-nav" onclick="changeMonth(-1)">← Previous</button>
@@ -1066,6 +1070,7 @@
       const userName = document.getElementById('user-name');
       const logoutBtn = document.getElementById('logout-btn');
       const attendanceApp = document.getElementById('attendance-app');
+      const saveBtn = document.getElementById('save-attendance-btn');
 
       // Helper: Save/load attendance to Firestore
       async function saveAttendanceToFirestore(uid, data) {
@@ -1148,6 +1153,19 @@
           attendanceApp.style.display = 'none';
         }
       });
+
+      // Save attendance to Firestore
+      saveBtn.onclick = async () => {
+        if (firebaseUser) {
+          const data = {
+            subjects: window.subjects,
+            selectedSubject: window.selectedSubject,
+            scheduleVersion: 2
+          };
+          await setDoc(doc(db, "attendance", firebaseUser.uid), { data });
+          alert("Attendance saved!");
+        }
+      };
     </script>
     <script>
         // Image Carousel
