@@ -851,95 +851,199 @@
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Hero Section -->
-        <div class="hero-section">
-            <div class="hero-content">
-                <h1>🎓 Academy of Architecture</h1>
-                <p class="subtitle">Smart Attendance Planning for Academic Excellence</p>
-                <div class="semester-info">
-                    Final Year B.Arch - Semester IX | Session 2025-2026<br>
-                    <strong>June 10, 2025 - September 16, 2025</strong>
-                </div>
-            </div>
-        </div>
-
-        <!-- Image Carousel -->
-        <div class="carousel-section">
-            <div class="carousel-header">
-                <h2 class="carousel-title">🖼️ Campus Gallery</h2>
-                <p class="carousel-subtitle">Capturing memories from our architectural journey</p>
-            </div>
-            <div class="carousel-container">
-                <div class="carousel-wrapper" id="carouselWrapper">
-                    <div class="carousel-slide">
-                        <img src="IMG_4209.jpg" alt="Campus Image 1">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_5179.jpeg" alt="Campus Image 2">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_4255.jpg" alt="Campus Image 3">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_3484.jpeg" alt="Campus Image 4">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_0330.jpeg" alt="Campus Image 5">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="FE587BEE-B75A-4339-A4FC-4BDBE073A250.jpeg" alt="Campus Image 6">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_4209.jpg" alt="Campus Image 7">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="IMG_4255.jpg" alt="Campus Image 8">
+    <!-- Google Login UI -->
+    <div id="firebase-auth-bar" style="display: flex; justify-content: flex-end; align-items: center; gap: 1em; margin-bottom: 1em; flex-wrap: wrap;">
+        <button id="google-login" style="padding: 0.5em 1.2em; border-radius: 8px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">Sign in with Google</button>
+        <button id="logout" style="display:none; padding: 0.5em 1.2em; border-radius: 8px; border: none; background: #f87171; color: white; font-weight: 600; cursor: pointer;">Logout</button>
+        <span id="user-info" style="font-size: 1em; color: #64748b;"></span>
+    </div>
+    <div id="attendance-app">
+        <div class="main-container">
+            <!-- Hero Section -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>🎓 Academy of Architecture</h1>
+                    <p class="subtitle">Smart Attendance Planning for Academic Excellence</p>
+                    <div class="semester-info">
+                        Final Year B.Arch - Semester IX | Session 2025-2026<br>
+                        <strong>June 10, 2025 - September 16, 2025</strong>
                     </div>
                 </div>
-                <button class="carousel-nav prev" onclick="changeSlide(-1)">‹</button>
-                <button class="carousel-nav next" onclick="changeSlide(1)">›</button>
             </div>
-            <div class="carousel-indicators" id="carouselIndicators"></div>
-        </div>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-            <button class="quick-btn" onclick="markTodayAllAttended()">✅ Mark Today: All Attended</button>
-            <button class="quick-btn danger" onclick="markTodayAllBunked()">❌ Mark Today: All Bunked</button>
-            <button class="quick-btn" onclick="resetAllAttendance()">🔄 Reset All Data</button>
-            <button class="quick-btn" onclick="exportData()">📊 Export Report</button>
-        </div>
-
-        <!-- Main Content -->
-        <div class="content-wrapper">
-            <div class="subjects-grid" id="subjectsGrid"></div>
-
-            <div class="calendar">
-                <div class="calendar-header">
-                    <button class="calendar-nav" onclick="changeMonth(-1)">← Previous</button>
-                    <h3 id="currentMonth"></h3>
-                    <button class="calendar-nav" onclick="changeMonth(1)">Next →</button>
+            <!-- Image Carousel -->
+            <div class="carousel-section">
+                <div class="carousel-header">
+                    <h2 class="carousel-title">🖼️ Campus Gallery</h2>
+                    <p class="carousel-subtitle">Capturing memories from our architectural journey</p>
                 </div>
-                <div class="calendar-grid" id="calendarGrid"></div>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"></div>
-                        <span>Attended</span>
+                <div class="carousel-container">
+                    <div class="carousel-wrapper" id="carouselWrapper">
+                        <div class="carousel-slide">
+                            <img src="IMG_4209.jpg" alt="Campus Image 1">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_5179.jpeg" alt="Campus Image 2">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_4255.jpg" alt="Campus Image 3">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_3484.jpeg" alt="Campus Image 4">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_0330.jpeg" alt="Campus Image 5">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="FE587BEE-B75A-4339-A4FC-4BDBE073A250.jpeg" alt="Campus Image 6">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_4209.jpg" alt="Campus Image 7">
+                        </div>
+                        <div class="carousel-slide">
+                            <img src="IMG_4255.jpg" alt="Campus Image 8">
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"></div>
-                        <span>Bunked</span>
+                    <button class="carousel-nav prev" onclick="changeSlide(-1)">‹</button>
+                    <button class="carousel-nav next" onclick="changeSlide(1)">›</button>
+                </div>
+                <div class="carousel-indicators" id="carouselIndicators"></div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="markTodayAllAttended()">✅ Mark Today: All Attended</button>
+                <button class="quick-btn danger" onclick="markTodayAllBunked()">❌ Mark Today: All Bunked</button>
+                <button class="quick-btn" onclick="resetAllAttendance()">🔄 Reset All Data</button>
+                <button class="quick-btn" onclick="exportData()">📊 Export Report</button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content-wrapper">
+                <div class="subjects-grid" id="subjectsGrid"></div>
+
+                <div class="calendar">
+                    <div class="calendar-header">
+                        <button class="calendar-nav" onclick="changeMonth(-1)">← Previous</button>
+                        <h3 id="currentMonth"></h3>
+                        <button class="calendar-nav" onclick="changeMonth(1)">Next →</button>
                     </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"></div>
-                        <span>Upcoming</span>
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);"></div>
+                            <span>Attended</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"></div>
+                            <span>Bunked</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%);"></div>
+                            <span>Upcoming</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+      import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAivmSS-l5RZ-pK5pQ1QnKbGHveLte3pHs",
+        authDomain: "attendance-a7ada.firebaseapp.com",
+        projectId: "attendance-a7ada",
+        storageBucket: "attendance-a7ada.appspot.com",
+        messagingSenderId: "485257899915",
+        appId: "1:485257899915:web:ad5ff35cc6da9e8e39498e"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      // UI elements
+      const loginBtn = document.getElementById('google-login');
+      const logoutBtn = document.getElementById('logout');
+      const userInfo = document.getElementById('user-info');
+      const attendanceApp = document.getElementById('attendance-app');
+
+      // Helper: Save/load attendance to Firestore
+      async function saveAttendanceToFirestore(uid, data) {
+        await setDoc(doc(db, "attendance", uid), { data });
+      }
+      async function loadAttendanceFromFirestore(uid) {
+        const docSnap = await getDoc(doc(db, "attendance", uid));
+        if (docSnap.exists()) {
+          return docSnap.data().data;
+        } else {
+          return null;
+        }
+      }
+
+      // Patch saveData/loadData to use Firestore if logged in
+      let firebaseUser = null;
+      let originalSaveData = window.saveData;
+      let originalLoadData = window.loadData;
+      window.saveData = async function() {
+        if (firebaseUser) {
+          const data = {
+            subjects: window.subjects,
+            selectedSubject: window.selectedSubject,
+            scheduleVersion: 2
+          };
+          await saveAttendanceToFirestore(firebaseUser.uid, data);
+        } else {
+          originalSaveData();
+        }
+      };
+      window.loadData = async function() {
+        if (firebaseUser) {
+          const data = await loadAttendanceFromFirestore(firebaseUser.uid);
+          if (data) {
+            window.subjects = data.subjects.map(subject => ({
+              ...subject,
+              startDate: new Date(subject.startDate),
+              examDate: new Date(subject.examDate)
+            }));
+            window.selectedSubject = data.selectedSubject;
+          }
+        } else {
+          originalLoadData();
+        }
+      };
+
+      // Auth logic
+      loginBtn.onclick = async () => {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
+      };
+      logoutBtn.onclick = async () => {
+        await signOut(auth);
+      };
+      onAuthStateChanged(auth, async (user) => {
+        firebaseUser = user;
+        if (user) {
+          loginBtn.style.display = 'none';
+          logoutBtn.style.display = 'inline';
+          userInfo.textContent = `Signed in as ${user.displayName}`;
+          attendanceApp.style.display = '';
+          await window.loadData();
+          if (typeof window.updateDisplay === 'function') window.updateDisplay();
+        } else {
+          loginBtn.style.display = 'inline';
+          logoutBtn.style.display = 'none';
+          userInfo.textContent = '';
+          attendanceApp.style.display = 'none';
+        }
+      });
+    </script>
     <script>
         // Image Carousel
         let currentSlide = 0;
@@ -1228,37 +1332,6 @@
             URL.revokeObjectURL(url);
         }
 
-        function saveData() {
-            const data = {
-                subjects: subjects,
-                selectedSubject: selectedSubject,
-                scheduleVersion: 2 // Updated version after removing Arch Design from Monday
-            };
-            localStorage.setItem('attendanceData', JSON.stringify(data));
-        }
-
-        function loadData() {
-            const saved = localStorage.getItem('attendanceData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                // Check if this is an old version of the schedule
-                if (!data.scheduleVersion || data.scheduleVersion < 2) {
-                    // Clear old data and use new schedule
-                    localStorage.removeItem('attendanceData');
-                    console.log('Schedule updated - clearing old attendance data');
-                    return;
-                }
-                if (data.subjects) {
-                    subjects = data.subjects.map(subject => ({
-                        ...subject,
-                        startDate: new Date(subject.startDate),
-                        examDate: new Date(subject.examDate)
-                    }));
-                }
-                selectedSubject = data.selectedSubject;
-            }
-        }
-
         function updateDisplay() {
             updateSubjectsGrid();
             updateCalendar();
@@ -1421,7 +1494,6 @@
         }
 
         // Initialize the application
-        loadData();
         initializeSubjects();
         initializeCarousel();
         updateDisplay();
