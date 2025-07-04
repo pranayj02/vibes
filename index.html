@@ -1076,7 +1076,7 @@
       window.currentDate = new Date('2025-06-01'); // Start of semester
 
       // Assign default subjects directly to window.subjects
-      window.subjects = [
+      let subjects = [
           {
               id: 1,
               name: "Design Dissertation - 1",
@@ -1168,8 +1168,8 @@
               attendance: {}
           }
       ];
-      window.selectedSubject = null;
-      window.currentDate = new Date('2025-06-01');
+      let selectedSubject = null;
+      let currentDate = new Date('2025-06-01');
       initializeSubjects();
 
       // Helper: Save/load attendance to Firestore
@@ -1192,8 +1192,8 @@
       window.saveData = async function() {
         if (firebaseUser) {
           const data = {
-            subjects: window.subjects,
-            selectedSubject: window.selectedSubject,
+            subjects: subjects,
+            selectedSubject: selectedSubject,
             scheduleVersion: 2
           };
           await saveAttendanceToFirestore(firebaseUser.uid, data);
@@ -1206,16 +1206,16 @@
           const data = await loadAttendanceFromFirestore(firebaseUser.uid);
           if (data) {
             console.log('Loaded from Firestore:', data); // Debug log
-            window.subjects = data.subjects.map(subject => ({
+            subjects = data.subjects.map(subject => ({
               ...subject,
               startDate: new Date(subject.startDate),
               examDate: new Date(subject.examDate)
             }));
-            window.selectedSubject = data.selectedSubject;
+            selectedSubject = data.selectedSubject;
             if (typeof window.updateDisplay === 'function') window.updateDisplay();
           } else {
             // Only initialize if no saved data
-            window.subjects = [
+            subjects = [
                 {
                     id: 1,
                     name: "Design Dissertation - 1",
@@ -1307,8 +1307,8 @@
                     attendance: {}
                 }
             ];
-            window.selectedSubject = null;
-            window.currentDate = new Date('2025-06-01');
+            selectedSubject = null;
+            currentDate = new Date('2025-06-01');
             initializeSubjects();
             if (typeof window.updateDisplay === 'function') window.updateDisplay();
           }
@@ -1362,8 +1362,8 @@
           const originalText = saveBtn.textContent;
           saveBtn.textContent = 'Saving...';
           const data = {
-            subjects: window.subjects,
-            selectedSubject: window.selectedSubject,
+            subjects: subjects,
+            selectedSubject: selectedSubject,
             scheduleVersion: 2
           };
           console.log('Saving to Firestore:', data); // Debug log
@@ -1421,7 +1421,7 @@
 
         // Initialize all subjects with their schedules
         function initializeSubjects() {
-            window.subjects.forEach(subject => {
+            subjects.forEach(subject => {
                 generateClassSchedule(subject);
             });
         }
@@ -1442,7 +1442,7 @@
         }
 
         function toggleAttendance(subjectId, dateKey) {
-            const subject = window.subjects.find(s => s.id === subjectId);
+            const subject = subjects.find(s => s.id === subjectId);
             if (!subject || !subject.attendance[dateKey]) return;
             const currentStatus = subject.attendance[dateKey];
             if (currentStatus === 'upcoming') {
@@ -1505,13 +1505,13 @@
         }
 
         function selectSubject(subjectId) {
-            window.selectedSubject = window.selectedSubject === subjectId ? null : subjectId;
+            selectedSubject = selectedSubject === subjectId ? null : subjectId;
             updateDisplay();
         }
 
         function markTodayAllAttended() {
             const today = new Date().toDateString();
-            window.subjects.forEach(subject => {
+            subjects.forEach(subject => {
                 if (subject.attendance[today]) {
                     subject.attendance[today] = 'attended';
                 }
@@ -1522,7 +1522,7 @@
 
         function markTodayAllBunked() {
             const today = new Date().toDateString();
-            window.subjects.forEach(subject => {
+            subjects.forEach(subject => {
                 if (subject.attendance[today]) {
                     subject.attendance[today] = 'bunked';
                 }
@@ -1533,7 +1533,7 @@
 
         function resetAllAttendance() {
             if (confirm('Are you sure you want to reset all attendance data?')) {
-                window.subjects.forEach(subject => {
+                subjects.forEach(subject => {
                     Object.keys(subject.attendance).forEach(date => {
                         subject.attendance[date] = 'upcoming';
                     });
@@ -1547,7 +1547,7 @@
             let exportText = "Academy of Architecture - Attendance Report\n";
             exportText += "=========================================\n\n";
             
-            window.subjects.forEach(subject => {
+            subjects.forEach(subject => {
                 const stats = calculateStats(subject);
                 exportText += `${subject.name}\n`;
                 exportText += `Current Attendance: ${stats.currentPercentage}%\n`;
@@ -1573,10 +1573,10 @@
             const grid = document.getElementById('subjectsGrid');
             grid.innerHTML = '';
 
-            window.subjects.forEach(subject => {
+            subjects.forEach(subject => {
                 const stats = calculateStats(subject);
                 const card = document.createElement('div');
-                card.className = `subject-card ${window.selectedSubject === subject.id ? 'selected' : ''}`;
+                card.className = `subject-card ${selectedSubject === subject.id ? 'selected' : ''}`;
                 card.onclick = () => selectSubject(subject.id);
                 
                 let percentageClass = '';
@@ -1633,8 +1633,8 @@
         }
 
         function updateCalendar() {
-            const year = window.currentDate.getFullYear();
-            const month = window.currentDate.getMonth();
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
             
             document.getElementById('currentMonth').textContent = 
                 new Date(year, month, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -1690,11 +1690,11 @@
                 let classesHtml = '';
                 let hasClass = false;
                 
-                window.subjects.forEach(subject => {
+                subjects.forEach(subject => {
                     if (subject.attendance[dayKey]) {
                         hasClass = true;
                         const status = subject.attendance[dayKey];
-                        const isSelected = window.selectedSubject === subject.id;
+                        const isSelected = selectedSubject === subject.id;
                         const subjectShort = subject.name.split(' ')[0] + (subject.name.split(' ')[1] ? ' ' + subject.name.split(' ')[1].substring(0, 2) : '');
                         
                         classesHtml += `
@@ -1721,7 +1721,7 @@
         }
 
         function changeMonth(direction) {
-            window.currentDate.setMonth(window.currentDate.getMonth() + direction);
+            currentDate.setMonth(currentDate.getMonth() + direction);
             updateCalendar();
         }
 
