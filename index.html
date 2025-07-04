@@ -993,14 +993,29 @@
         }
       }
 
-      // Robust save/loadData wrappers
+      // Helper to prepare data for Firestore (convert Dates to ISO strings)
+      function prepareDataForFirestore(data) {
+        return {
+          ...data,
+          subjects: data.subjects.map(subject => ({
+            ...subject,
+            startDate: subject.startDate instanceof Date && !isNaN(subject.startDate)
+              ? subject.startDate.toISOString()
+              : subject.startDate,
+            examDate: subject.examDate instanceof Date && !isNaN(subject.examDate)
+              ? subject.examDate.toISOString()
+              : subject.examDate
+          }))
+        };
+      }
+
       window.saveData = async function() {
         const data = { subjects: window.subjects, selectedSubject: window.selectedSubject };
         // always write locally
         saveDataLocally(data);
         // then try Firestore
         try {
-          await saveAttendanceToFirestore(data);
+          await saveAttendanceToFirestore(prepareDataForFirestore(data));
         } catch (e) {
           console.error('Error saving to Firestore:', e);
         }
