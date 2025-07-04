@@ -1019,9 +1019,8 @@
 
       window.saveData = async function() {
         const data = { subjects: window.subjects, selectedSubject: window.selectedSubject };
-        // always write locally
         saveDataLocally(data);
-        // then try Firestore
+        console.log('Saving to Firestore:', prepareDataForFirestore(data));
         try {
           await saveAttendanceToFirestore(prepareDataForFirestore(data));
         } catch (e) {
