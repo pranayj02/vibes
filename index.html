@@ -1581,6 +1581,14 @@
                 }, 1500);
             });
         }
+
+        // Remove pre-load rendering, load data then render
+        window.loadData().then(() => {
+            console.log('Loaded subjects:', window.subjects);
+            initializeSubjects();
+            initializeCarousel();
+            updateDisplay();
+        });
     </script>
 </body>
 </html>
