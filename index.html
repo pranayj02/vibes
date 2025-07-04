@@ -910,6 +910,8 @@
                 <button class="quick-btn danger" onclick="markTodayAllBunked()">❌ Mark Today: All Bunked</button>
                 <button class="quick-btn" onclick="resetAllAttendance()">🔄 Reset All Data</button>
                 <button class="quick-btn" onclick="exportData()">📊 Export Report</button>
+                <button class="quick-btn" id="save-btn" onclick="manualSave()">💾 Save</button>
+                <span id="save-confirmation" style="display:none; margin-left: 1em; color: #22c55e; font-weight: 600;">Saved!</span>
             </div>
 
             <!-- Main Content -->
@@ -1460,6 +1462,17 @@
         // Set calendar to start of semester
         currentDate = new Date('2025-06-01');
         updateCalendar();
+
+        // Manual Save Button Logic
+        function manualSave() {
+            window.saveData().then(() => {
+                const conf = document.getElementById('save-confirmation');
+                conf.style.display = 'inline';
+                setTimeout(() => {
+                    conf.style.display = 'none';
+                }, 1500);
+            });
+        }
     </script>
 </body>
 </html>
