@@ -851,12 +851,6 @@
     </style>
 </head>
 <body>
-    <!-- Google Login UI -->
-    <div id="firebase-auth-bar" style="display: flex; justify-content: flex-end; align-items: center; gap: 1em; margin-bottom: 1em; flex-wrap: wrap;">
-        <button id="google-login" style="padding: 0.5em 1.2em; border-radius: 8px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer;">Sign in with Google</button>
-        <button id="logout" style="display:none; padding: 0.5em 1.2em; border-radius: 8px; border: none; background: #f87171; color: white; font-weight: 600; cursor: pointer;">Logout</button>
-        <span id="user-info" style="font-size: 1em; color: #64748b;"></span>
-    </div>
     <div id="attendance-app">
         <div class="main-container">
             <!-- Hero Section -->
@@ -950,7 +944,6 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-      import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
       import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
       // Your web app's Firebase configuration
@@ -965,21 +958,14 @@
 
       // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
       const db = getFirestore(app);
 
-      // UI elements
-      const loginBtn = document.getElementById('google-login');
-      const logoutBtn = document.getElementById('logout');
-      const userInfo = document.getElementById('user-info');
-      const attendanceApp = document.getElementById('attendance-app');
-
-      // Helper: Save/load attendance to Firestore
-      async function saveAttendanceToFirestore(uid, data) {
-        await setDoc(doc(db, "attendance", uid), { data });
+      // Helper: Save/load attendance to Firestore (global doc)
+      async function saveAttendanceToFirestore(data) {
+        await setDoc(doc(db, "attendance", "global"), { data });
       }
-      async function loadAttendanceFromFirestore(uid) {
-        const docSnap = await getDoc(doc(db, "attendance", uid));
+      async function loadAttendanceFromFirestore() {
+        const docSnap = await getDoc(doc(db, "attendance", "global"));
         if (docSnap.exists()) {
           return docSnap.data().data;
         } else {
@@ -987,61 +973,34 @@
         }
       }
 
-      // Patch saveData/loadData to use Firestore if logged in
-      let firebaseUser = null;
+      // Patch saveData/loadData to use Firestore global doc
       let originalSaveData = window.saveData;
       let originalLoadData = window.loadData;
       window.saveData = async function() {
-        if (firebaseUser) {
-          const data = {
-            subjects: window.subjects,
-            selectedSubject: window.selectedSubject,
-            scheduleVersion: 2
-          };
-          await saveAttendanceToFirestore(firebaseUser.uid, data);
-        } else {
-          originalSaveData();
-        }
+        const data = {
+          subjects: window.subjects,
+          selectedSubject: window.selectedSubject,
+          scheduleVersion: 2
+        };
+        await saveAttendanceToFirestore(data);
+        if (originalSaveData) originalSaveData();
       };
       window.loadData = async function() {
-        if (firebaseUser) {
-          const data = await loadAttendanceFromFirestore(firebaseUser.uid);
-          if (data) {
-            window.subjects = data.subjects.map(subject => ({
-              ...subject,
-              startDate: new Date(subject.startDate),
-              examDate: new Date(subject.examDate)
-            }));
-            window.selectedSubject = data.selectedSubject;
-          }
-        } else {
-          originalLoadData();
+        const data = await loadAttendanceFromFirestore();
+        if (data) {
+          window.subjects = data.subjects.map(subject => ({
+            ...subject,
+            startDate: new Date(subject.startDate),
+            examDate: new Date(subject.examDate)
+          }));
+          window.selectedSubject = data.selectedSubject;
         }
+        if (originalLoadData) originalLoadData();
       };
 
-      // Auth logic
-      loginBtn.onclick = async () => {
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-      };
-      logoutBtn.onclick = async () => {
-        await signOut(auth);
-      };
-      onAuthStateChanged(auth, async (user) => {
-        firebaseUser = user;
-        if (user) {
-          loginBtn.style.display = 'none';
-          logoutBtn.style.display = 'inline';
-          userInfo.textContent = `Signed in as ${user.displayName}`;
-          attendanceApp.style.display = '';
-          await window.loadData();
-          if (typeof window.updateDisplay === 'function') window.updateDisplay();
-        } else {
-          loginBtn.style.display = 'inline';
-          logoutBtn.style.display = 'none';
-          userInfo.textContent = '';
-          attendanceApp.style.display = 'none';
-        }
+      // Always show the app and load data on page load
+      window.loadData().then(() => {
+        if (typeof window.updateDisplay === 'function') window.updateDisplay();
       });
     </script>
     <script>
