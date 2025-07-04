@@ -1197,106 +1197,11 @@
             changeSlide(1);
         }, 5000);
 
-        // Pre-configured subjects based on the timetable
-        let subjects = [
-            {
-                id: 1,
-                name: "Design Dissertation - 1",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [1], // Monday
-                timeSlot: "7:30 AM - 10:30 AM",
-                attendance: {}
-            },
-            {
-                id: 2,
-                name: "Arch. Design Studio - 8",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [2], // Tuesday only (double lecture)
-                timeSlot: "7:30 AM - 2:00 PM",
-                attendance: {}
-            },
-            {
-                id: 3,
-                name: "Allied Studio - 8 (Town Planning)",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [3, 5], // Wednesday & Friday
-                timeSlot: "7:30 AM - 10:30 AM / 11:00 AM - 12:00 PM",
-                attendance: {}
-            },
-            {
-                id: 4,
-                name: "Professional Practice - 2",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [4], // Thursday
-                timeSlot: "7:30 AM - 10:30 AM",
-                attendance: {}
-            },
-            {
-                id: 5,
-                name: "Arch. Building Construction - 8",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [5], // Friday
-                timeSlot: "7:30 AM - 10:30 AM",
-                attendance: {}
-            },
-            {
-                id: 6,
-                name: "Environmental Studies - 4",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [1], // Monday
-                timeSlot: "11:00 AM - 2:00 PM",
-                attendance: {}
-            },
-            {
-                id: 7,
-                name: "Theory & Design of Structures - 8",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [3], // Wednesday
-                timeSlot: "11:00 AM - 12:30 PM",
-                attendance: {}
-            },
-            {
-                id: 8,
-                name: "Arch. Building Services - 6",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [4], // Thursday
-                timeSlot: "12:30 PM - 2:00 PM",
-                attendance: {}
-            },
-            {
-                id: 9,
-                name: "Elective - 8",
-                target: 75,
-                startDate: new Date('2025-06-10'),
-                examDate: new Date('2025-09-16'),
-                classDays: [5], // Friday
-                timeSlot: "11:00 AM - 2:00 PM",
-                attendance: {}
-            }
-        ];
-
         let currentDate = new Date();
-        let selectedSubject = null;
 
         // Initialize all subjects with their schedules
         function initializeSubjects() {
-            subjects.forEach(subject => {
+            window.subjects.forEach(subject => {
                 generateClassSchedule(subject);
             });
         }
@@ -1317,7 +1222,7 @@
         }
 
         function toggleAttendance(subjectId, dateKey) {
-            const subject = subjects.find(s => s.id === subjectId);
+            const subject = window.subjects.find(s => s.id === subjectId);
             if (!subject || !subject.attendance[dateKey]) return;
 
             const currentStatus = subject.attendance[dateKey];
@@ -1392,7 +1297,7 @@
 
         function markTodayAllAttended() {
             const today = new Date().toDateString();
-            subjects.forEach(subject => {
+            window.subjects.forEach(subject => {
                 if (subject.attendance[today]) {
                     subject.attendance[today] = 'attended';
                 }
@@ -1403,7 +1308,7 @@
 
         function markTodayAllBunked() {
             const today = new Date().toDateString();
-            subjects.forEach(subject => {
+            window.subjects.forEach(subject => {
                 if (subject.attendance[today]) {
                     subject.attendance[today] = 'bunked';
                 }
@@ -1414,7 +1319,7 @@
 
         function resetAllAttendance() {
             if (confirm('Are you sure you want to reset all attendance data?')) {
-                subjects.forEach(subject => {
+                window.subjects.forEach(subject => {
                     Object.keys(subject.attendance).forEach(date => {
                         subject.attendance[date] = 'upcoming';
                     });
@@ -1428,7 +1333,7 @@
             let exportText = "Academy of Architecture - Attendance Report\n";
             exportText += "=========================================\n\n";
             
-            subjects.forEach(subject => {
+            window.subjects.forEach(subject => {
                 const stats = calculateStats(subject);
                 exportText += `${subject.name}\n`;
                 exportText += `Current Attendance: ${stats.currentPercentage}%\n`;
@@ -1454,10 +1359,10 @@
             const grid = document.getElementById('subjectsGrid');
             grid.innerHTML = '';
 
-            subjects.forEach(subject => {
+            window.subjects.forEach(subject => {
                 const stats = calculateStats(subject);
                 const card = document.createElement('div');
-                card.className = `subject-card ${selectedSubject === subject.id ? 'selected' : ''}`;
+                card.className = `subject-card ${window.selectedSubject === subject.id ? 'selected' : ''}`;
                 card.onclick = () => window.selectSubject(subject.id);
                 
                 let percentageClass = '';
@@ -1571,11 +1476,11 @@
                 let classesHtml = '';
                 let hasClass = false;
                 
-                subjects.forEach(subject => {
+                window.subjects.forEach(subject => {
                     if (subject.attendance[dayKey]) {
                         hasClass = true;
                         const status = subject.attendance[dayKey];
-                        const isSelected = selectedSubject === subject.id;
+                        const isSelected = window.selectedSubject === subject.id;
                         const subjectShort = subject.name.split(' ')[0] + (subject.name.split(' ')[1] ? ' ' + subject.name.split(' ')[1].substring(0, 2) : '');
                         
                         classesHtml += `
