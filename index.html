@@ -1456,7 +1456,7 @@
                 const stats = calculateStats(subject);
                 const card = document.createElement('div');
                 card.className = `subject-card ${selectedSubject === subject.id ? 'selected' : ''}`;
-                card.onclick = () => selectSubject(subject.id);
+                card.onclick = () => window.selectSubject(subject.id);
                 
                 let percentageClass = '';
                 if (stats.currentPercentage < subject.target) {
