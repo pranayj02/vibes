@@ -1383,9 +1383,11 @@
         }
 
         function selectSubject(subjectId) {
+            console.log('selectSubject called with:', subjectId);
             window.selectedSubject = window.selectedSubject === subjectId ? null : subjectId;
+            console.log('window.selectedSubject now:', window.selectedSubject);
             updateDisplay();
-            saveData();
+            saveData(); // auto-save on selection
         }
 
         function markTodayAllAttended() {
