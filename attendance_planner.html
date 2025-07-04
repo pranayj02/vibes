@@ -934,94 +934,487 @@
         </div>
     </div>
 
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    <script>
+        // Image Carousel
+        let currentSlide = 0;
+        const totalSlides = 6;
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAivmSS-l5RZ-pK5pQ1QnKbGHveLte3pHs",
-      authDomain: "attendance-a7ada.firebaseapp.com",
-      projectId: "attendance-a7ada",
-      storageBucket: "attendance-a7ada.appspot.com",
-      messagingSenderId: "485257899915",
-      appId: "1:485257899915:web:ad5ff35cc6da9e8e39498e"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // UI feedback
-    const feedback = document.createElement('div');
-    feedback.style.textAlign = 'center';
-    feedback.style.margin = '1em 0';
-    feedback.style.fontWeight = '600';
-    feedback.style.color = '#764ba2';
-    document.querySelector('.main-container').insertBefore(feedback, document.querySelector('.content-wrapper'));
-
-    // Save Attendance Button
-    const saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Save Attendance';
-    saveBtn.className = 'quick-btn';
-    saveBtn.style.display = 'block';
-    saveBtn.style.margin = '0 auto 1.5em auto';
-    document.querySelector('.calendar').parentNode.insertBefore(saveBtn, document.querySelector('.calendar'));
-
-    // Save/load helpers
-    async function saveAttendanceToFirestore(data) {
-      feedback.textContent = 'Saving...';
-      saveBtn.disabled = true;
-      try {
-        await setDoc(doc(db, "attendance", "global"), { data });
-        feedback.textContent = 'Attendance saved!';
-        setTimeout(() => feedback.textContent = '', 2000);
-      } catch (err) {
-        feedback.textContent = 'Failed to save attendance.';
-      }
-      saveBtn.disabled = false;
-    }
-    async function loadAttendanceFromFirestore() {
-      feedback.textContent = 'Loading attendance...';
-      try {
-        const docSnap = await getDoc(doc(db, "attendance", "global"));
-        if (docSnap.exists()) {
-          return docSnap.data().data;
+        function initializeCarousel() {
+            const indicators = document.getElementById('carouselIndicators');
+            for (let i = 0; i < totalSlides; i++) {
+                const indicator = document.createElement('div');
+                indicator.className = `carousel-indicator ${i === 0 ? 'active' : ''}`;
+                indicator.onclick = () => goToSlide(i);
+                indicators.appendChild(indicator);
+            }
         }
-      } catch (err) {
-        feedback.textContent = 'Failed to load attendance.';
-      }
-      feedback.textContent = '';
-      return null;
-    }
 
-    // Patch saveData/loadData to use Firestore global doc
-    window.saveData = async function() {
-      const data = {
-        subjects: window.subjects,
-        selectedSubject: window.selectedSubject,
-        scheduleVersion: 2
-      };
-      await saveAttendanceToFirestore(data);
-    };
-    window.loadData = async function() {
-      const data = await loadAttendanceFromFirestore();
-      if (data) {
-        window.subjects = data.subjects.map(subject => ({
-          ...subject,
-          startDate: new Date(subject.startDate),
-          examDate: new Date(subject.examDate)
-        }));
-        window.selectedSubject = data.selectedSubject;
-      }
-      if (typeof window.updateDisplay === 'function') window.updateDisplay();
-    };
+        function changeSlide(direction) {
+            currentSlide += direction;
+            if (currentSlide >= totalSlides) currentSlide = 0;
+            if (currentSlide < 0) currentSlide = totalSlides - 1;
+            updateCarousel();
+        }
 
-    // Save button handler
-    saveBtn.onclick = () => window.saveData();
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateCarousel();
+        }
 
-    // On page load, load attendance
-    window.addEventListener('DOMContentLoaded', () => {
-      window.loadData();
-    });
+        function updateCarousel() {
+            const wrapper = document.getElementById('carouselWrapper');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            
+            wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        // Auto-advance carousel
+        setInterval(() => {
+            changeSlide(1);
+        }, 5000);
+
+        // Pre-configured subjects based on the timetable
+        let subjects = [
+            {
+                id: 1,
+                name: "Design Dissertation - 1",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [1], // Monday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 2,
+                name: "Arch. Design Studio - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [2], // Tuesday only (double lecture)
+                timeSlot: "7:30 AM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 3,
+                name: "Allied Studio - 8 (Town Planning)",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [3, 5], // Wednesday & Friday
+                timeSlot: "7:30 AM - 10:30 AM / 11:00 AM - 12:00 PM",
+                attendance: {}
+            },
+            {
+                id: 4,
+                name: "Professional Practice - 2",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [4], // Thursday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 5,
+                name: "Arch. Building Construction - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [5], // Friday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 6,
+                name: "Environmental Studies - 4",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [1], // Monday
+                timeSlot: "11:00 AM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 7,
+                name: "Theory & Design of Structures - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [3], // Wednesday
+                timeSlot: "11:00 AM - 12:30 PM",
+                attendance: {}
+            },
+            {
+                id: 8,
+                name: "Arch. Building Services - 6",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [4], // Thursday
+                timeSlot: "12:30 PM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 9,
+                name: "Elective - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [5], // Friday
+                timeSlot: "11:00 AM - 2:00 PM",
+                attendance: {}
+            }
+        ];
+
+        let currentDate = new Date();
+        let selectedSubject = null;
+
+        // Initialize all subjects with their schedules
+        function initializeSubjects() {
+            subjects.forEach(subject => {
+                generateClassSchedule(subject);
+            });
+        }
+
+        function generateClassSchedule(subject) {
+            const startDate = new Date(subject.startDate);
+            const endDate = new Date(subject.examDate);
+            
+            let currentDate = new Date(startDate);
+            
+            while (currentDate <= endDate) {
+                if (subject.classDays.includes(currentDate.getDay())) {
+                    const dayKey = currentDate.toDateString();
+                    subject.attendance[dayKey] = 'upcoming';
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+
+        function toggleAttendance(subjectId, dateKey) {
+            const subject = subjects.find(s => s.id === subjectId);
+            if (!subject || !subject.attendance[dateKey]) return;
+
+            const currentStatus = subject.attendance[dateKey];
+            
+            if (currentStatus === 'upcoming') {
+                subject.attendance[dateKey] = 'attended';
+            } else if (currentStatus === 'attended') {
+                subject.attendance[dateKey] = 'bunked';
+            } else if (currentStatus === 'bunked') {
+                subject.attendance[dateKey] = 'attended';
+            }
+            
+            updateDisplay();
+            saveData();
+        }
+
+        function calculateStats(subject) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            let totalClassesHeld = 0;
+            let attendedClasses = 0;
+            let bunkedClasses = 0;
+            let upcomingClasses = 0;
+            let totalScheduledClasses = 0;
+
+            Object.entries(subject.attendance).forEach(([dateKey, status]) => {
+                const classDate = new Date(dateKey);
+                totalScheduledClasses++;
+                
+                if (classDate <= today) {
+                    totalClassesHeld++;
+                    if (status === 'attended') {
+                        attendedClasses++;
+                    } else if (status === 'bunked') {
+                        bunkedClasses++;
+                    } else {
+                        bunkedClasses++;
+                        subject.attendance[dateKey] = 'bunked';
+                    }
+                } else {
+                    upcomingClasses++;
+                }
+            });
+
+            const currentPercentage = totalClassesHeld > 0 ? 
+                Math.round((attendedClasses / totalClassesHeld) * 100) : 100;
+
+            const requiredAttendance = Math.ceil((subject.target / 100) * totalScheduledClasses);
+            const canStillBunk = Math.max(0, attendedClasses + upcomingClasses - requiredAttendance);
+            const classesNeededForTarget = Math.max(0, requiredAttendance - attendedClasses);
+
+            return {
+                currentPercentage,
+                attendedClasses,
+                bunkedClasses,
+                upcomingClasses,
+                totalClassesHeld,
+                totalScheduledClasses,
+                canStillBunk,
+                classesNeededForTarget
+            };
+        }
+
+        function selectSubject(subjectId) {
+            selectedSubject = selectedSubject === subjectId ? null : subjectId;
+            updateDisplay();
+        }
+
+        function markTodayAllAttended() {
+            const today = new Date().toDateString();
+            subjects.forEach(subject => {
+                if (subject.attendance[today]) {
+                    subject.attendance[today] = 'attended';
+                }
+            });
+            updateDisplay();
+            saveData();
+        }
+
+        function markTodayAllBunked() {
+            const today = new Date().toDateString();
+            subjects.forEach(subject => {
+                if (subject.attendance[today]) {
+                    subject.attendance[today] = 'bunked';
+                }
+            });
+            updateDisplay();
+            saveData();
+        }
+
+        function resetAllAttendance() {
+            if (confirm('Are you sure you want to reset all attendance data?')) {
+                subjects.forEach(subject => {
+                    Object.keys(subject.attendance).forEach(date => {
+                        subject.attendance[date] = 'upcoming';
+                    });
+                });
+                updateDisplay();
+                saveData();
+            }
+        }
+
+        function exportData() {
+            let exportText = "Academy of Architecture - Attendance Report\n";
+            exportText += "=========================================\n\n";
+            
+            subjects.forEach(subject => {
+                const stats = calculateStats(subject);
+                exportText += `${subject.name}\n`;
+                exportText += `Current Attendance: ${stats.currentPercentage}%\n`;
+                exportText += `Attended: ${stats.attendedClasses} | Bunked: ${stats.bunkedClasses} | Can Still Bunk: ${stats.canStillBunk}\n`;
+                exportText += `Schedule: ${subject.timeSlot}\n\n`;
+            });
+            
+            const blob = new Blob([exportText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendance-report.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function saveData() {
+            const data = {
+                subjects: subjects,
+                selectedSubject: selectedSubject
+            };
+            localStorage.setItem('attendanceData', JSON.stringify(data));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('attendanceData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data.subjects) {
+                    subjects = data.subjects.map(subject => ({
+                        ...subject,
+                        startDate: new Date(subject.startDate),
+                        examDate: new Date(subject.examDate)
+                    }));
+                }
+                selectedSubject = data.selectedSubject;
+            }
+        }
+
+        function updateDisplay() {
+            updateSubjectsGrid();
+            updateCalendar();
+        }
+
+        function updateSubjectsGrid() {
+            const grid = document.getElementById('subjectsGrid');
+            grid.innerHTML = '';
+
+            subjects.forEach(subject => {
+                const stats = calculateStats(subject);
+                const card = document.createElement('div');
+                card.className = `subject-card ${selectedSubject === subject.id ? 'selected' : ''}`;
+                card.onclick = () => selectSubject(subject.id);
+                
+                let percentageClass = '';
+                if (stats.currentPercentage < subject.target) {
+                    percentageClass = 'low';
+                } else if (stats.currentPercentage < subject.target + 10) {
+                    percentageClass = 'medium';
+                }
+                
+                let warningMessage = '';
+                if (stats.currentPercentage < subject.target) {
+                    if (stats.classesNeededForTarget > stats.upcomingClasses) {
+                        warningMessage = `<div class="warning danger">⚠️ Cannot reach ${subject.target}% target! Need ${stats.classesNeededForTarget} classes but only ${stats.upcomingClasses} remaining.</div>`;
+                    } else {
+                        warningMessage = `<div class="warning">📢 Must attend next ${stats.classesNeededForTarget} classes to reach target!</div>`;
+                    }
+                } else if (stats.canStillBunk > 0) {
+                    warningMessage = `<div class="warning success">✅ Safe zone! You can bunk ${stats.canStillBunk} more classes.</div>`;
+                }
+                
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const scheduleDays = subject.classDays.map(day => dayNames[day]).join(', ');
+                
+                card.innerHTML = `
+                    <div class="subject-header">
+                        <span class="subject-name">${subject.name}</span>
+                        <span class="attendance-percentage ${percentageClass}">${stats.currentPercentage}%</span>
+                    </div>
+                    <div class="subject-schedule">
+                        📅 ${scheduleDays} | ⏰ ${subject.timeSlot}
+                    </div>
+                    <div class="subject-details">
+                        Classes held: ${stats.totalClassesHeld} | Total scheduled: ${stats.totalScheduledClasses}
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.attendedClasses}</div>
+                            <div class="stat-label">Attended</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.bunkedClasses}</div>
+                            <div class="stat-label">Bunked</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${stats.canStillBunk}</div>
+                            <div class="stat-label">Can Bunk</div>
+                        </div>
+                    </div>
+                    ${warningMessage}
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function updateCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('currentMonth').textContent = 
+                currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            // Add day headers
+            const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day calendar-header-day';
+                header.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.98) 100%)';
+                header.style.backdropFilter = 'blur(20px)';
+                header.style.color = 'white';
+                header.style.fontWeight = '700';
+                header.style.fontSize = '0.9rem';
+                header.style.textAlign = 'center';
+                header.style.minHeight = '60px';
+                header.style.display = 'flex';
+                header.style.alignItems = 'center';
+                header.style.justifyContent = 'center';
+                header.style.letterSpacing = '0.02em';
+                header.style.textTransform = 'uppercase';
+                header.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+                header.style.boxShadow = 'inset 0 1px 0 rgba(255, 255, 255, 0.2)';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Add calendar days
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                if (date.getMonth() !== month) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                if (date.toDateString() === new Date().toDateString()) {
+                    dayElement.classList.add('today');
+                }
+                
+                const dayKey = date.toDateString();
+                let classesHtml = '';
+                let hasClass = false;
+                
+                subjects.forEach(subject => {
+                    if (subject.attendance[dayKey]) {
+                        hasClass = true;
+                        const status = subject.attendance[dayKey];
+                        const isSelected = selectedSubject === subject.id;
+                        const subjectShort = subject.name.split(' ')[0] + (subject.name.split(' ')[1] ? ' ' + subject.name.split(' ')[1].substring(0, 2) : '');
+                        
+                        classesHtml += `
+                            <div class="class-indicator ${status} ${isSelected ? 'selected-subject' : ''}" 
+                                 onclick="toggleAttendance(${subject.id}, '${dayKey}')" 
+                                 title="${subject.name} - ${status} (click to toggle)">
+                                ${subjectShort}
+                            </div>
+                        `;
+                    }
+                });
+                
+                if (hasClass) {
+                    dayElement.classList.add('has-class');
+                }
+                
+                dayElement.innerHTML = `
+                    <div class="day-number">${date.getDate()}</div>
+                    ${classesHtml}
+                `;
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            updateCalendar();
+        }
+
+        // Initialize the application
+        loadData();
+        initializeSubjects();
+        initializeCarousel();
+        updateDisplay();
+
+        // Set calendar to start of semester
+        currentDate = new Date('2025-06-01');
+        updateCalendar();
     </script>
 </body>
 </html>
