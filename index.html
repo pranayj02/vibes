@@ -572,13 +572,14 @@
         function generateClassSchedule(subject) {
             const startDate = new Date(subject.startDate);
             const endDate = new Date(subject.examDate);
-            
             let currentDate = new Date(startDate);
-            
             while (currentDate <= endDate) {
                 if (subject.classDays.includes(currentDate.getDay())) {
                     const dayKey = currentDate.toDateString();
-                    subject.attendance[dayKey] = 'upcoming';
+                    // Only set if not already present
+                    if (subject.attendance[dayKey] === undefined) {
+                        subject.attendance[dayKey] = 'upcoming';
+                    }
                 }
                 currentDate.setDate(currentDate.getDate() + 1);
             }
