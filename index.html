@@ -993,18 +993,26 @@
         }
       }
 
-      // Helper to prepare data for Firestore (convert Dates to ISO strings)
+      // Helper to robustly convert to ISO string or null
+      function toValidISOString(val) {
+        if (val instanceof Date && !isNaN(val)) {
+          return val.toISOString();
+        }
+        if (typeof val === 'string') {
+          const d = new Date(val);
+          if (!isNaN(d)) return d.toISOString();
+        }
+        return null;
+      }
+
+      // Helper to prepare data for Firestore (convert Dates/strings to ISO strings or null)
       function prepareDataForFirestore(data) {
         return {
           ...data,
           subjects: data.subjects.map(subject => ({
             ...subject,
-            startDate: subject.startDate instanceof Date && !isNaN(subject.startDate)
-              ? subject.startDate.toISOString()
-              : subject.startDate,
-            examDate: subject.examDate instanceof Date && !isNaN(subject.examDate)
-              ? subject.examDate.toISOString()
-              : subject.examDate
+            startDate: toValidISOString(subject.startDate),
+            examDate: toValidISOString(subject.examDate)
           }))
         };
       }
