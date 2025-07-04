@@ -1121,6 +1121,14 @@
           window.selectedSubject = null;
         }
       };
+
+      // Initialization: load data, then render UI
+      window.loadData().then(() => {
+        console.log('Loaded subjects:', window.subjects);
+        initializeSubjects();
+        initializeCarousel();
+        updateDisplay();
+      });
     </script>
     <script>
         // Image Carousel
@@ -1581,14 +1589,6 @@
                 }, 1500);
             });
         }
-
-        // Remove pre-load rendering, load data then render
-        window.loadData().then(() => {
-            console.log('Loaded subjects:', window.subjects);
-            initializeSubjects();
-            initializeCarousel();
-            updateDisplay();
-        });
     </script>
 </body>
 </html>
