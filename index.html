@@ -948,6 +948,15 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
       import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+      // LocalStorage helpers
+      function saveDataLocally(data) {
+        localStorage.setItem('attendanceData', JSON.stringify(data));
+      }
+      function loadDataLocally() {
+        const raw = localStorage.getItem('attendanceData');
+        return raw ? JSON.parse(raw) : null;
+      }
+
       // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyAivmSS-l5RZ-pK5pQ1QnKbGHveLte3pHs",
@@ -964,46 +973,154 @@
 
       // Helper: Save/load attendance to Firestore (global doc)
       async function saveAttendanceToFirestore(data) {
-        await setDoc(doc(db, "attendance", "global"), { data });
+        try {
+          await setDoc(doc(db, "attendance", "global"), { data });
+        } catch (e) {
+          console.error('Error saving to Firestore:', e);
+        }
       }
       async function loadAttendanceFromFirestore() {
-        const docSnap = await getDoc(doc(db, "attendance", "global"));
-        if (docSnap.exists()) {
-          return docSnap.data().data;
-        } else {
+        try {
+          const docSnap = await getDoc(doc(db, "attendance", "global"));
+          if (docSnap.exists()) {
+            return docSnap.data().data;
+          } else {
+            return null;
+          }
+        } catch (e) {
+          console.warn('Firestore load failed, falling back to localStorage:', e);
           return null;
         }
       }
 
-      // Patch saveData/loadData to use Firestore global doc
-      let originalSaveData = window.saveData;
-      let originalLoadData = window.loadData;
+      // Robust save/loadData wrappers
       window.saveData = async function() {
-        const data = {
-          subjects: window.subjects,
-          selectedSubject: window.selectedSubject,
-          scheduleVersion: 2
-        };
-        await saveAttendanceToFirestore(data);
-        if (originalSaveData) originalSaveData();
-      };
-      window.loadData = async function() {
-        const data = await loadAttendanceFromFirestore();
-        if (data) {
-          window.subjects = data.subjects.map(subject => ({
-            ...subject,
-            startDate: new Date(subject.startDate),
-            examDate: new Date(subject.examDate)
-          }));
-          window.selectedSubject = data.selectedSubject;
+        const data = { subjects: window.subjects, selectedSubject: window.selectedSubject };
+        // always write locally
+        saveDataLocally(data);
+        // then try Firestore
+        try {
+          await saveAttendanceToFirestore(data);
+        } catch (e) {
+          console.error('Error saving to Firestore:', e);
         }
-        if (originalLoadData) originalLoadData();
       };
 
-      // Always show the app and load data on page load
-      window.loadData().then(() => {
-        if (typeof window.updateDisplay === 'function') window.updateDisplay();
-      });
+      window.loadData = async function() {
+        let data = null;
+        // first try Firestore
+        try {
+          const fs = await loadAttendanceFromFirestore();
+          if (fs) data = fs;
+        } catch (e) {
+          console.warn('Firestore load failed, falling back to localStorage:', e);
+        }
+        // fallback to localStorage
+        if (!data) data = loadDataLocally();
+        if (data) {
+          window.subjects = data.subjects.map(s => ({
+            ...s,
+            startDate: new Date(s.startDate),
+            examDate: new Date(s.examDate)
+          }));
+          window.selectedSubject = data.selectedSubject;
+        } else {
+          // Fallback: initialize with default subjects
+          window.subjects = [
+            {
+                id: 1,
+                name: "Design Dissertation - 1",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [1], // Monday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 2,
+                name: "Arch. Design Studio - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [2], // Tuesday only (double lecture)
+                timeSlot: "7:30 AM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 3,
+                name: "Allied Studio - 8 (Town Planning)",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [3, 5], // Wednesday & Friday
+                timeSlot: "7:30 AM - 10:30 AM / 11:00 AM - 12:00 PM",
+                attendance: {}
+            },
+            {
+                id: 4,
+                name: "Professional Practice - 2",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [4], // Thursday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 5,
+                name: "Arch. Building Construction - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [5], // Friday
+                timeSlot: "7:30 AM - 10:30 AM",
+                attendance: {}
+            },
+            {
+                id: 6,
+                name: "Environmental Studies - 4",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [1], // Monday
+                timeSlot: "11:00 AM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 7,
+                name: "Theory & Design of Structures - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [3], // Wednesday
+                timeSlot: "11:00 AM - 12:30 PM",
+                attendance: {}
+            },
+            {
+                id: 8,
+                name: "Arch. Building Services - 6",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [4], // Thursday
+                timeSlot: "12:30 PM - 2:00 PM",
+                attendance: {}
+            },
+            {
+                id: 9,
+                name: "Elective - 8",
+                target: 75,
+                startDate: new Date('2025-06-10'),
+                examDate: new Date('2025-09-16'),
+                classDays: [5], // Friday
+                timeSlot: "11:00 AM - 2:00 PM",
+                attendance: {}
+            }
+          ];
+          window.selectedSubject = null;
+        }
+      };
     </script>
     <script>
         // Image Carousel
@@ -1453,15 +1570,6 @@
             currentDate.setMonth(currentDate.getMonth() + direction);
             updateCalendar();
         }
-
-        // Initialize the application
-        initializeSubjects();
-        initializeCarousel();
-        updateDisplay();
-
-        // Set calendar to start of semester
-        currentDate = new Date('2025-06-01');
-        updateCalendar();
 
         // Manual Save Button Logic
         function manualSave() {
