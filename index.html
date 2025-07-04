@@ -1072,6 +1072,9 @@
       const attendanceApp = document.getElementById('attendance-app');
       const saveBtn = document.getElementById('save-attendance-btn');
 
+      // At the top of your script, set global currentDate
+      window.currentDate = new Date('2025-06-01'); // Start of semester
+
       // Assign default subjects directly to window.subjects
       window.subjects = [
           {
@@ -1211,6 +1214,100 @@
             if (typeof window.updateDisplay === 'function') window.updateDisplay();
           } else {
             // Only initialize if no saved data
+            window.subjects = [
+                {
+                    id: 1,
+                    name: "Design Dissertation - 1",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [1], // Monday
+                    timeSlot: "7:30 AM - 10:30 AM",
+                    attendance: {}
+                },
+                {
+                    id: 2,
+                    name: "Arch. Design Studio - 8",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [2], // Tuesday only (double lecture)
+                    timeSlot: "7:30 AM - 2:00 PM",
+                    attendance: {}
+                },
+                {
+                    id: 3,
+                    name: "Allied Studio - 8 (Town Planning)",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [3, 5], // Wednesday & Friday
+                    timeSlot: "7:30 AM - 10:30 AM / 11:00 AM - 12:00 PM",
+                    attendance: {}
+                },
+                {
+                    id: 4,
+                    name: "Professional Practice - 2",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [4], // Thursday
+                    timeSlot: "7:30 AM - 10:30 AM",
+                    attendance: {}
+                },
+                {
+                    id: 5,
+                    name: "Arch. Building Construction - 8",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [5], // Friday
+                    timeSlot: "7:30 AM - 10:30 AM",
+                    attendance: {}
+                },
+                {
+                    id: 6,
+                    name: "Environmental Studies - 4",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [1], // Monday
+                    timeSlot: "11:00 AM - 2:00 PM",
+                    attendance: {}
+                },
+                {
+                    id: 7,
+                    name: "Theory & Design of Structures - 8",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [3], // Wednesday
+                    timeSlot: "11:00 AM - 12:30 PM",
+                    attendance: {}
+                },
+                {
+                    id: 8,
+                    name: "Arch. Building Services - 6",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [4], // Thursday
+                    timeSlot: "12:30 PM - 2:00 PM",
+                    attendance: {}
+                },
+                {
+                    id: 9,
+                    name: "Elective - 8",
+                    target: 75,
+                    startDate: new Date('2025-06-10'),
+                    examDate: new Date('2025-09-16'),
+                    classDays: [5], // Friday
+                    timeSlot: "11:00 AM - 2:00 PM",
+                    attendance: {}
+                }
+            ];
+            window.selectedSubject = null;
+            window.currentDate = new Date('2025-06-01');
             initializeSubjects();
             if (typeof window.updateDisplay === 'function') window.updateDisplay();
           }
@@ -1535,8 +1632,8 @@
         }
 
         function updateCalendar() {
-            const year = new Date().getFullYear();
-            const month = new Date().getMonth();
+            const year = window.currentDate.getFullYear();
+            const month = window.currentDate.getMonth();
             
             document.getElementById('currentMonth').textContent = 
                 new Date(year, month, 1).toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -1623,8 +1720,7 @@
         }
 
         function changeMonth(direction) {
-            const currentDate = new Date();
-            currentDate.setMonth(currentDate.getMonth() + direction);
+            window.currentDate.setMonth(window.currentDate.getMonth() + direction);
             updateCalendar();
         }
 
