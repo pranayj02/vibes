@@ -1111,6 +1111,9 @@
               examDate: new Date(subject.examDate)
             }));
             window.selectedSubject = data.selectedSubject;
+          } else {
+            // Only initialize if no saved data
+            initializeSubjects();
           }
         } else {
           originalLoadData();
