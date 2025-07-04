@@ -1105,18 +1105,22 @@
         if (firebaseUser) {
           const data = await loadAttendanceFromFirestore(firebaseUser.uid);
           if (data) {
+            console.log('Loaded from Firestore:', data); // Debug log
             window.subjects = data.subjects.map(subject => ({
               ...subject,
               startDate: new Date(subject.startDate),
               examDate: new Date(subject.examDate)
             }));
             window.selectedSubject = data.selectedSubject;
+            if (typeof window.updateDisplay === 'function') window.updateDisplay();
           } else {
             // Only initialize if no saved data
             initializeSubjects();
+            if (typeof window.updateDisplay === 'function') window.updateDisplay();
           }
         } else {
           originalLoadData();
+          if (typeof window.updateDisplay === 'function') window.updateDisplay();
         }
       };
 
@@ -1157,16 +1161,24 @@
         }
       });
 
-      // Save attendance to Firestore
+      // Save attendance to Firestore with visual feedback and logging
       saveBtn.onclick = async () => {
         if (firebaseUser) {
+          saveBtn.disabled = true;
+          const originalText = saveBtn.textContent;
+          saveBtn.textContent = 'Saving...';
           const data = {
             subjects: window.subjects,
             selectedSubject: window.selectedSubject,
             scheduleVersion: 2
           };
+          console.log('Saving to Firestore:', data); // Debug log
           await setDoc(doc(db, "attendance", firebaseUser.uid), { data });
-          alert("Attendance saved!");
+          saveBtn.textContent = 'Saved!';
+          setTimeout(() => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+          }, 2000);
         }
       };
     </script>
