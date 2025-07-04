@@ -1381,8 +1381,9 @@
         }
 
         function selectSubject(subjectId) {
-            selectedSubject = selectedSubject === subjectId ? null : subjectId;
+            window.selectedSubject = window.selectedSubject === subjectId ? null : subjectId;
             updateDisplay();
+            saveData();
         }
 
         function markTodayAllAttended() {
