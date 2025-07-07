@@ -1013,7 +1013,7 @@
                 id: 4,
                 name: "Professional Practice - 2",
                 target: 75,
-                startDate: new Date('2025-06-10'),
+                startDate: new Date('2024-06-13'),
                 examDate: new Date('2025-09-16'),
                 classDays: [4], // Thursday
                 timeSlot: "7:30 AM - 10:30 AM",
@@ -1053,7 +1053,7 @@
                 id: 8,
                 name: "Arch. Building Services - 6",
                 target: 75,
-                startDate: new Date('2025-06-10'),
+                startDate: new Date('2024-06-13'),
                 examDate: new Date('2025-09-16'),
                 classDays: [4], // Thursday
                 timeSlot: "12:30 PM - 2:00 PM",
@@ -1127,16 +1127,12 @@
             Object.entries(subject.attendance).forEach(([dateKey, status]) => {
                 const classDate = new Date(dateKey);
                 totalScheduledClasses++;
-                
                 if (classDate <= today) {
                     totalClassesHeld++;
                     if (status === 'attended') {
                         attendedClasses++;
                     } else if (status === 'bunked') {
                         bunkedClasses++;
-                    } else {
-                        bunkedClasses++;
-                        subject.attendance[dateKey] = 'bunked';
                     }
                 } else {
                     upcomingClasses++;
